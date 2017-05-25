@@ -1,0 +1,27 @@
+version: '2'
+
+services:
+    php56:
+        build:
+            context: .
+            dockerfile: ./php56/Dockerfile
+#        image: phpcentos:56
+        restart: always
+        volumes:
+            - ./source/sites/mpgu:/var/www/site/mpgu:rw
+            - ./php56/www.conf:/opt/remi/php56/root/etc/php-fpm.d/www.conf
+            - ./logs/php-fpm:/opt/remi/php56/root/var/log/php-fpm:rw
+        working_dir: /var/www/site
+    proxy:
+        image: nginx:latest
+        restart: always
+        ports:
+            - "81:80"
+        depends_on:
+            - php56
+        links:
+            - php56
+        volumes:
+            - ./nginx/sites.conf:/etc/nginx/conf.d/sites.conf
+            - ./logs/nginx:/var/logs/nginx:rw
+            - ./source/sites/mpgu:/var/www/site/mpgu:rw
