@@ -8,13 +8,17 @@ RUN yum -y update
 
 RUN yum install -y libaio \
                    gcc \
-                   openssl-devel
+                   openssl-devel \
+                   git
 
 ADD source/oracle-instantclient12.1-devel-12.1.0.2.0-1.x86_64.rpm /tmp
 ADD source/oracle-instantclient12.1-basic-12.1.0.2.0-1.x86_64.rpm /tmp
 
 RUN rpm -i /tmp/oracle-instantclient12.1-basic-12.1.0.2.0-1.x86_64.rpm && \
     rpm -i /tmp/oracle-instantclient12.1-devel-12.1.0.2.0-1.x86_64.rpm
+
+RUN export LD_LIBRARY_PATH=/usr/lib/oracle/12.1/client64/lib/
+RUN export ORACLE_HOME=/usr/lib/oracle/12.1/client64/lib/
 
 ENV LD_LIBRARY_PATH /usr/lib/oracle/12.1/client64/lib/
 ENV ORACLE_HOME /usr/lib/oracle/12.1/client64/lib/
@@ -35,8 +39,13 @@ RUN yum install -y php54-php-common \
                    php54-php-devel \
                    php54-php-xml \
                    php54-php-pdo \
-                   php54-php-oci8
+                   php54-php-oci8 \
+                   php54-php-bcmath \
+                   php54-php-pecl-xdebug \
+                   php54-xhprof
 
 EXPOSE 9000
 
-ENTRYPOINT ["/opt/remi/php54/root/usr/sbin/php-fpm", "--nodaemonize"]
+RUN echo '/opt/remi/php54/root/usr/sbin/php-fpm --nodaemonize' > /tmp/entrypoint.sh
+
+ENTRYPOINT ["sh", "/tmp/entrypoint.sh"]
