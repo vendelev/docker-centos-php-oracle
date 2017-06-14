@@ -8,13 +8,17 @@ RUN yum -y update
 
 RUN yum install -y libaio \
                    gcc \
-                   openssl-devel
+                   openssl-devel \
+                   git
 
 ADD source/oracle-instantclient12.1-devel-12.1.0.2.0-1.x86_64.rpm /tmp
 ADD source/oracle-instantclient12.1-basic-12.1.0.2.0-1.x86_64.rpm /tmp
 
 RUN rpm -i /tmp/oracle-instantclient12.1-basic-12.1.0.2.0-1.x86_64.rpm && \
     rpm -i /tmp/oracle-instantclient12.1-devel-12.1.0.2.0-1.x86_64.rpm
+
+RUN export LD_LIBRARY_PATH=/usr/lib/oracle/12.1/client64/lib/
+RUN export ORACLE_HOME=/usr/lib/oracle/12.1/client64/lib/
 
 ENV LD_LIBRARY_PATH /usr/lib/oracle/12.1/client64/lib/
 ENV ORACLE_HOME /usr/lib/oracle/12.1/client64/lib/
@@ -35,7 +39,10 @@ RUN yum install -y php71-php-common \
                    php71-php-devel \
                    php71-php-xml \
                    php71-php-pdo \
-                   php71-php-oci8
+                   php71-php-oci8 \
+                   php71-php-bcmath \
+                   php71-php-pecl-xdebug \
+                   php71-xhprof
 
 EXPOSE 9000
 

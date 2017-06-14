@@ -27,6 +27,19 @@ services:
             - ./www/logs/oauth:/www/logs/oauth:rw
             - ./var/www/sites:/var/www/sites:rw
         working_dir: /var/www/sites
+    php71:
+        build:
+            context: .
+            dockerfile: ./php71/Dockerfile
+        restart: always
+        volumes:
+            - ./config/php54/www.conf:/opt/remi/php71/root/etc/php-fpm.d/www.conf
+            - ./var/logs/php71/php-fpm:/opt/remi/php71/root/var/log/php-fpm:rw
+            - ./var/logs/php71/lib:/www/logs/lib:rw
+            - ./www/logs/lib:/www/logs/lib:rw
+            - ./www/logs/oauth:/www/logs/oauth:rw
+            - ./var/www/sites:/var/www/sites:rw
+        working_dir: /var/www/sites
     proxy:
         image: nginx:latest
         restart: always
@@ -35,9 +48,11 @@ services:
         depends_on:
             - php54
             - php56
+            - php71
         links:
             - php54
             - php56
+            - php71
         volumes:
             - ./config/nginx/sites.conf:/etc/nginx/conf.d/sites.conf
             - ./config/nginx/mpgu.common:/etc/nginx/conf.d/mpgu.common
