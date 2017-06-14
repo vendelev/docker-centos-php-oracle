@@ -1,0 +1,117 @@
+listen 80;
+
+charset                 utf-8;
+client_max_body_size    128M;
+
+proxy_read_timeout      3600;
+proxy_connect_timeout   3600;
+proxy_send_timeout      3600;
+
+set $DOC_ROOT   "";
+set $IS_SITE    1;
+
+index           index.php;
+error_page      404     /404.html;
+
+if ($host ~* ^mpgu\.([a-z0-9\-]+)\.dkr$) {
+    set $DOC_ROOT   "/var/www/sites/mpgu/www/htdocs";
+}
+
+if ($host ~* ^adm\.mpgu\.([a-z0-9\-]+)\.dkr$) {
+    set $DOC_ROOT   "/var/www/sites/mpgu/adm/htdocs";
+    set $IS_SITE     0;
+}
+
+if ($host ~* ^test\.mpgu\.([a-z0-9\-]+)\.dkr$) {
+    set $DOC_ROOT   "/var/www/sites/mpgu/test/htdocs";
+    set $IS_SITE     0;
+}
+
+if ($host ~* ^(css|js|media)\.mpgu\.([a-z0-9\-]+)\.dkr$) {
+    set $DOC_ROOT   "/var/www/sites/mpgu/www/htdocs";
+    set $IS_SITE     0;
+}
+
+if ($DOC_ROOT = "") {
+    return 405;
+}
+
+location ~* \.(JPG|jpg1|jpg|jpeg|gif|png|svg|js|css|mp3|ogg|mpeg|avi|zip|gz|bz2|rar|swf|flv|exe|bmp|tiff|tif|ico|doc|docx|xls|xlsx|ppt|pptx|pdf|html|htm|txt|file|ttf|eot|woff|woff2|mp4|ogv|webm|json|mov|fla|txt)$ {
+    expires     -1;
+    add_header  Access-Control-Allow-Origin *;
+    root        $DOC_ROOT;
+    try_files   $uri =404;
+}
+
+location /common/ {
+    root    $DOC_ROOT;
+}
+
+#location ~ /common/img/forms/(?<org_id>[\w_]+)/(?<form_id>[\w_]+)/(?<image>.*)$ {
+#    set $TARGET_URL     http://$host;
+#    set $TARGET_HOST    $host;
+
+#    if ($form_id = "abonement") {
+#        set $TARGET_URL     "http://newesz.itopcase.ru/Pools/Images/";
+#        set $TARGET_HOST    "newesz.itopcase.ru";
+#    }
+#    if ($form_id = "077060701") {
+#        set $TARGET_URL     "http://esz.mos.ru/Images/Photos/";
+#        set $TARGET_HOST    "esz.mos.ru";
+#    }
+
+#    proxy_pass           $TARGET_URL$image;
+#    proxy_set_header     Host $TARGET_HOST;
+#    proxy_set_header     X-Real-IP $remote_addr;
+#    proxy_set_header     X-Forwarded-For $proxy_add_x_forwarded_for;
+
+#    proxy_cache          content_cache;
+#    proxy_cache_key     $TARGET_HOST$uri$is_args$args;
+#    proxy_cache_valid    any 10m;
+#    expires              1d;
+#}
+
+location ~* /\. {
+    deny all;
+}
+
+#   # перенаправление на обработчик форм
+rewrite ^(/ru/application/[^/]+/)(index.php)?$  $1index.php break;
+rewrite ^(/ru/application/index.php)$ $1 break;
+rewrite ^(/ru/application/[^/]+/)(index.php)?$  $1index.php break;
+rewrite ^(/ru/application/[^/]+)$               $1/         permanent;
+rewrite ^(/ru/application/[^/]+/[^/]+)$         $1/         permanent;
+rewrite ^/ru/application/([^/]+)/([^/]+)/       /ru/application/index.php?org_id=$1&form_id=$2  break;
+
+# перенаправление на обработчик форм для ajax
+rewrite ^(/common/ajax/[^/]+/[^/]+)$            $1/         permanent;
+rewrite ^/common/ajax/([^/]+)/([^/]+)/          /common/ajax/index.php?org_id=$1&form_id=$2     break;
+
+# поддержка для SEO
+rewrite ^/sitemap.xml$ /common/tool/sitemap.php break;
+
+# поддержка красивых адресов
+rewrite ^/ru/mfc/([^\/]+)/$                                     /ru/mfc/index.php?show=mfc&id=$1                                        break;
+rewrite ^/ru/services/online                                    /ru/services/?show=online                                               break;
+rewrite ^/ru/corporate/services/online                          /ru/corporate/services/?show=online                                     break;
+rewrite ^/ru/services/category/(\d+)/?$                         /ru/services/category/index.php?id=$1                                   break;
+rewrite ^/ru/corporate/services/category/(\d+)/?$               /ru/corporate/services/category/index.php?id=$1                         break;
+rewrite ^/ru/services/link/(\w+)/(\d+)/?$                       /ru/services/link/index.php?plugin=$1&id=$2                             break;
+rewrite ^/ru/services/link/(\d+)/?$                             /ru/services/link/index.php?id=$1                                       break;
+rewrite ^/ru/departments/(\d+)/?$                               /ru/departments/index.php?ssid=$1                                       break;
+rewrite ^/ru/departments/office/(\d+)/?$                        /ru/departments/office/index.php?ofid=$1                                break;
+rewrite ^/ru/services/passport/(\d+)/?$                         /ru/services/passport/index.php?poid=$1                                 break;
+rewrite ^/ru/services/(\d+)/?$                                  /ru/services/procedure/index.php?toid=$1                                break;
+rewrite ^/ru/services/procedure/(\d+)/(\d+)/(\d+)/?$            /ru/services/procedure/index.php?poid=$1&soid=$2&toid=$3                break;
+rewrite ^/ru/services/procedure/printable/(\d+)/(\d+)/(\d+)/?$  /ru/services/procedure/printable.php?poid=$1&soid=$2&toid=$3            break;
+rewrite ^/ru/services/procedure/(\d+)/(\d+)/(\d+)/d(\d+)/?$     /ru/services/procedure/index.php?poid=$1&soid=$2&toid=$3&doid=$4        break;
+
+if ($IS_SITE) {
+    rewrite ^/$ /ru/ permanent;
+}
+
+location / {
+    # Redirect everything that isn't a real file to index.php
+    root        $DOC_ROOT;
+    try_files   $uri $uri/  /index.php?$args;
+}
