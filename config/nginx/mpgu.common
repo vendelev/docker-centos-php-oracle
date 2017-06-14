@@ -13,22 +13,22 @@ set $IS_SITE    1;
 index           index.php;
 error_page      404     /404.html;
 
-if ($host ~* ^mpgu\.([a-z0-9\-]+)\.dkr$) {
-    set $DOC_ROOT   "/var/www/sites/mpgu/www/htdocs";
+if ($host ~* ^([a-z0-9\-]+)\.([a-z0-9\-]+)\.dkr$) {
+    set $DOC_ROOT   "/var/www/sites/$1/www/htdocs";
 }
 
-if ($host ~* ^adm\.mpgu\.([a-z0-9\-]+)\.dkr$) {
-    set $DOC_ROOT   "/var/www/sites/mpgu/adm/htdocs";
+if ($host ~* ^adm\.([a-z0-9\-]+)\.([a-z0-9\-]+)\.dkr$) {
+    set $DOC_ROOT   "/var/www/sites/$1/adm/htdocs";
     set $IS_SITE     0;
 }
 
-if ($host ~* ^test\.mpgu\.([a-z0-9\-]+)\.dkr$) {
-    set $DOC_ROOT   "/var/www/sites/mpgu/test/htdocs";
+if ($host ~* ^test\.([a-z0-9\-]+)\.([a-z0-9\-]+)\.dkr$) {
+    set $DOC_ROOT   "/var/www/sites/$1/test/htdocs";
     set $IS_SITE     0;
 }
 
-if ($host ~* ^(css|js|media)\.mpgu\.([a-z0-9\-]+)\.dkr$) {
-    set $DOC_ROOT   "/var/www/sites/mpgu/www/htdocs";
+if ($host ~* ^(css|js|media)\.([a-z0-9\-]+)\.([a-z0-9\-]+)\.dkr$) {
+    set $DOC_ROOT   "/var/www/sites/$1/www/htdocs";
     set $IS_SITE     0;
 }
 
