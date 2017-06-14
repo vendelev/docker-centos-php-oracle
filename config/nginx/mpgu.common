@@ -28,7 +28,7 @@ if ($host ~* ^test\.([a-z0-9\-]+)\.([a-z0-9\-]+)\.dkr$) {
 }
 
 if ($host ~* ^(css|js|media)\.([a-z0-9\-]+)\.([a-z0-9\-]+)\.dkr$) {
-    set $DOC_ROOT   "/var/www/sites/$1/www/htdocs";
+    set $DOC_ROOT   "/var/www/sites/$2/www/htdocs";
     set $IS_SITE     0;
 }
 
