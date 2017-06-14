@@ -10,6 +10,21 @@ services:
             - ./config/php54/www.conf:/opt/remi/php54/root/etc/php-fpm.d/www.conf
             - ./var/logs/php54/php-fpm:/opt/remi/php54/root/var/log/php-fpm:rw
             - ./var/logs/php54/lib:/www/logs/lib:rw
+            - ./www/logs/lib:/www/logs/lib:rw
+            - ./www/logs/oauth:/www/logs/oauth:rw
+            - ./var/www/sites:/var/www/sites:rw
+        working_dir: /var/www/sites
+    php56:
+        build:
+            context: .
+            dockerfile: ./php56/Dockerfile
+        restart: always
+        volumes:
+            - ./config/php54/www.conf:/opt/remi/php56/root/etc/php-fpm.d/www.conf
+            - ./var/logs/php56/php-fpm:/opt/remi/php56/root/var/log/php-fpm:rw
+            - ./var/logs/php56/lib:/www/logs/lib:rw
+            - ./www/logs/lib:/www/logs/lib:rw
+            - ./www/logs/oauth:/www/logs/oauth:rw
             - ./var/www/sites:/var/www/sites:rw
         working_dir: /var/www/sites
     proxy:
@@ -19,8 +34,10 @@ services:
             - "80:80"
         depends_on:
             - php54
+            - php56
         links:
             - php54
+            - php56
         volumes:
             - ./config/nginx/sites.conf:/etc/nginx/conf.d/sites.conf
             - ./config/nginx/mpgu.common:/etc/nginx/conf.d/mpgu.common
